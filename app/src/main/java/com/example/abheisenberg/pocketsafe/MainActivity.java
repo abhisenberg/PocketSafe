@@ -1,5 +1,6 @@
 package com.example.abheisenberg.pocketsafe;
 
+import android.app.KeyguardManager;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -30,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
     ComponentName               componentName;
     PowerManager                powerManager;
     PowerManager.WakeLock       wakeLock;
-    PowerManager.WakeLock       partialWakeLock;
+    KeyguardManager             keyguardManager;
+    KeyguardManager.KeyguardLock keyguardLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +49,12 @@ public class MainActivity extends AppCompatActivity {
                 = new ComponentName(this, AdminReceiver.class);
         powerManager
                 = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        partialWakeLock
-                = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         wakeLock
-                = powerManager.newWakeLock((
-                         PowerManager.ACQUIRE_CAUSES_WAKEUP
-                | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-
-                ),TAG);
-
+                = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
+        keyguardManager
+                = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        keyguardLock
+                = keyguardManager.newKeyguardLock("NewKeyguradLock");
         SensorManager sensorManager
                 = (SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor proxSensor
@@ -99,20 +96,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause: ");
-
-        if(!partialWakeLock.isHeld()){
-            partialWakeLock.acquire();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: ");
-
-        if(partialWakeLock.isHeld()){
-            partialWakeLock.release();
-        }
     }
 
     @Override
@@ -139,24 +128,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean isAdminActive(){
-        String msg;
-        Boolean isActive = false;
-
         if(devicePolicyManager!=null
                 && devicePolicyManager.isAdminActive(componentName)) {
-            msg = "App is admin!";
-            isActive = true;
-        } else {
-            msg = "App is not admin!";
+            return true;
         }
-        Toast.makeText(this, msg , Toast.LENGTH_SHORT).show();
 
-        return isActive;
+         else return false;
     }
 
     public boolean isWakeLockAcq(){
         if(wakeLock.isHeld()){
-            Log.d(TAG, "WakeLock is aqc");
+            Log.d(TAG, "WakeLock is acquired");
             return true;
         } else {
             Log.d(TAG, "WakeLock is released/Not acq");
@@ -176,10 +158,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Now trying to acquire Wake Lock");
                 if(wakeLock != null && !isWakeLockAcq()){
                     wakeLock.acquire();
+                    keyguardLock.disableKeyguard();
                 }
                 isWakeLockAcq();
             }
         }.start();
     }
-
 }
