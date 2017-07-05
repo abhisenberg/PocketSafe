@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.abheisenberg.pocketsafe.MainActivity">
+
+
+    <TextView
+        android:id="@+id/tvProxiValues"
+        android:text="Value"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:textSize="35sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btLock"
+        android:layout_above="@id/tvProxiValues"
+        android:layout_centerHorizontal="true"
+        android:text="Lock Now"
+        android:textSize="15sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
