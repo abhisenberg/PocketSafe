@@ -8,8 +8,10 @@
 
 
     <TextView
-        android:id="@+id/tvProxiValues"
+        android:id="@+id/tvCount"
         android:text="Value"
+        android:gravity="center"
+        android:layout_margin="15dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:textSize="35sp"
@@ -18,9 +20,18 @@
 
     <Button
         android:id="@+id/btLock"
-        android:layout_above="@id/tvProxiValues"
+        android:layout_above="@id/tvCount"
         android:layout_centerHorizontal="true"
         android:text="Lock Now"
+        android:textSize="15sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btStopSound"
+        android:layout_below="@id/tvCount"
+        android:layout_centerHorizontal="true"
+        android:text="Stop alarm"
         android:textSize="15sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
