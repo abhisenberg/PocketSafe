@@ -7,16 +7,21 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.CountDownTimer;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,49 +29,46 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MainActivity";
 
-    TextView                        tvCount;
-    Button                          btLock, btStopAlarm;
-    DevicePolicyManager             devicePolicyManager;
-    ComponentName                   componentName;
-    PowerManager                    powerManager;
-    PowerManager.WakeLock           wakeLock;
-    KeyguardManager                 keyguardManager;
-    KeyguardManager.KeyguardLock    keyguardLock;
-    SensorManager                   sensorManager;
-    Sensor                          proxSensor;
-    SensorEventListener             sensorEventListener;
-    MediaPlayer                     alarmSound;
-    BroadcastReceiver               deviceUnlockedReceiver;
+    private TextView                        tvCount;
+    private DevicePolicyManager             devicePolicyManager;
+    private ComponentName                   componentName;
+    private PowerManager.WakeLock           wakeLock;
+    private SensorManager                   sensorManager;
+    private Sensor                          proxSensor;
+    private SensorEventListener             sensorEventListener;
+    private MediaPlayer                     alarmSound;
+    private AudioManager                    audioManager;
+    private Boolean                         bound;
+    private int                             oldVolume;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void  onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button btLock
+                = ((Button)findViewById(R.id.btLock));
+        Button btStopAlarm
+                = ((Button)findViewById(R.id.btStopSound));
+        PowerManager powerManager
+                = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        audioManager
+                = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         tvCount
                 = ((TextView)findViewById(R.id.tvCount));
-        btLock
-                = ((Button)findViewById(R.id.btLock));
-        btStopAlarm
-                = ((Button)findViewById(R.id.btStopSound));
         devicePolicyManager
                 = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         componentName
                 = new ComponentName(this, AdminReceiver.class);
-        powerManager
-                = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock
                 = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
-        keyguardManager
-                = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        keyguardLock
-                = keyguardManager.newKeyguardLock("NewKeyguradLock");
         sensorManager
                 = (SensorManager) getSystemService(SENSOR_SERVICE);
         proxSensor
                 = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         alarmSound
                 = MediaPlayer.create(this,R.raw.alarmsoundlesslouder);
+
         PhoneUnlockedReceiver phoneUnlockedReceiver
                 = new PhoneUnlockedReceiver();
 
@@ -75,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
             public void stopAlarmHere() {
                 if(alarmSound.isPlaying()){
                     alarmSound.stop();
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, oldVolume, 0);
                     Log.d(TAG, "alarm stopped from ACTION_USER, woohoo! ");
                 }
             }
@@ -135,6 +138,11 @@ public class MainActivity extends AppCompatActivity {
                     if(oldValue > 0){
                         tvCount.setText("Please put the phone in pocket!");
                     } else {
+                        /*
+                            Lock the device here and start the service to disable volume buttons.
+                            And disable power button if possible.
+                         */
+
                         devicePolicyManager.lockNow();
                     }
                 } else {
@@ -156,23 +164,28 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
+    }
+
+    @Override
+    protected void  onStart() {
+        super.onStart();
 
     }
 
     @Override
-    protected void onPause() {
+    protected void  onPause() {
         super.onPause();
         Log.d(TAG, "onPause: ");
     }
 
     @Override
-    protected void onResume() {
+    protected void  onResume() {
         super.onResume();
         Log.d(TAG, "onResume: ");
     }
 
     @Override
-    protected void onDestroy() {
+    protected void  onDestroy() {
         disableDeviceAdmin();
         if(isWakeLockAcq()){
             wakeLock.release();
@@ -183,7 +196,12 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    public void enableDeviceAdmin(){
+    @Override
+    protected void  onStop() {
+        super.onStop();
+    }
+
+    public void     enableDeviceAdmin(){
         Intent intent
                 = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
@@ -191,11 +209,11 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, 15);
     }
 
-    public void disableDeviceAdmin(){
+    public void     disableDeviceAdmin(){
         devicePolicyManager.removeActiveAdmin(componentName);
     }
 
-    public boolean isAdminActive(){
+    public boolean  isAdminActive(){
         if(devicePolicyManager!=null
                 && devicePolicyManager.isAdminActive(componentName)) {
             return true;
@@ -204,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
          else return false;
     }
 
-    public boolean isWakeLockAcq(){
+    public boolean  isWakeLockAcq(){
         if(wakeLock.isHeld()){
             Log.d(TAG, "WakeLock is acquired");
             return true;
@@ -214,13 +232,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /*
-    Waiting for N (=5 default) seconds, and then starting the proximity sensor and then
-     locking the phone simultaneously (if the initial value of proxSensor is < 0, this is
-     done in sensorValueChanged function.
-     */
-
-    public void putPhoneInsideGraceTime(){
+    public void     putPhoneInsideGraceTime(){
+         /*
+            Waiting for N (=5 default) seconds, and then starting the proximity sensor and then
+            locking the phone simultaneously (if the initial value of proxSensor is < 0, this is
+            done in sensorValueChanged function. And start a service to disable volume buttons and
+            power buttons.
+        */
         new CountDownTimer(5000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -238,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
         }.start();
     }
 
-    public void enterPwGraceTime(){
+    public void     enterPwGraceTime(){
         new CountDownTimer(5000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -247,8 +265,39 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
+                oldVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                audioManager.setStreamVolume
+                        (AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),0);
                 alarmSound.start();
             }
         }.start();
     }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if(event.getKeyCode() == KeyEvent.KEYCODE_POWER){
+            Log.d(TAG, "power button pressed ");
+            Intent closeDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            sendBroadcast(closeDialog);
+            return true;
+        }
+
+        if(event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_DOWN ||
+                event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP){
+            Log.d(TAG, "overriding volume button");
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
+    private class onLockedReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getStringExtra("message").equals("disable_volume")) {
+                dispatchKeyEvent(new KeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.ACTION_DOWN));
+            }
+        }
+    }
+
 }

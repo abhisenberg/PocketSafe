@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#7b8bff"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:src="@drawable/logo_big"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp" />
+
+    <TextView
+        android:layout_below="@id/logo"
+        android:layout_marginTop="50dp"
+        android:textColor="#FFFFFF"
+        android:text="PROTECT YOUR \nPHONE FROM THEFT"
+        android:gravity="center"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:typeface="monospace"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
