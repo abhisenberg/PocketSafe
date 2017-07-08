@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context="com.example.abheisenberg.pocketsafe.MainActivity">
 
-
     <TextView
         android:id="@+id/tvCount"
         android:text="Value"

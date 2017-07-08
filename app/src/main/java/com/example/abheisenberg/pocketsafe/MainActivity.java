@@ -1,5 +1,6 @@
 package com.example.abheisenberg.pocketsafe;
 
+import android.app.ActionBar;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -8,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -22,7 +25,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -36,15 +42,21 @@ public class MainActivity extends AppCompatActivity {
     private SensorManager                   sensorManager;
     private Sensor                          proxSensor;
     private SensorEventListener             sensorEventListener;
-    private MediaPlayer                     alarmSound;
+    private MediaPlayer                     alarmSound, countdownSound;
     private AudioManager                    audioManager;
-    private Boolean                         bound;
+    private CountDownTimer                  timeToEnterPw;
     private int                             oldVolume;
 
     @Override
     protected void  onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_main);
+
+        android.support.v7.app.ActionBar actionBar
+                = getSupportActionBar();
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#7b8bff")));
 
         Button btLock
                 = ((Button)findViewById(R.id.btLock));
@@ -68,6 +80,31 @@ public class MainActivity extends AppCompatActivity {
                 = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         alarmSound
                 = MediaPlayer.create(this,R.raw.alarmsoundlesslouder);
+        countdownSound
+                = MediaPlayer.create(this, R.raw.countdownsound);
+        timeToEnterPw
+                = new CountDownTimer(5000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                Log.d(TAG, "time left to enter pw: "+millisUntilFinished/1000);
+                if(Preferences.getCountdownSound(MainActivity.this)){
+                    Log.d(TAG, "Playing sound ");
+                    countdownSound.setLooping(true);
+                    countdownSound.start();
+                }
+            }
+
+            @Override
+            public void onFinish() {
+                if(countdownSound.isPlaying()){
+                    countdownSound.stop();
+                }
+                oldVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                audioManager.setStreamVolume
+                        (AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),0);
+                alarmSound.start();
+            }
+        };
 
         PhoneUnlockedReceiver phoneUnlockedReceiver
                 = new PhoneUnlockedReceiver();
@@ -79,6 +116,8 @@ public class MainActivity extends AppCompatActivity {
                     alarmSound.stop();
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, oldVolume, 0);
                     Log.d(TAG, "alarm stopped from ACTION_USER, woohoo! ");
+                } else {
+                    timeToEnterPw.cancel();
                 }
             }
         });
@@ -133,7 +172,8 @@ public class MainActivity extends AppCompatActivity {
                                                             // onSensorChanged not working properly in some devices.
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                if(oldValue == -1){
+                Log.d(TAG, String.valueOf(sensorEvent.values[0]));
+                if(oldValue < 0){
                     oldValue = sensorEvent.values[0];
                     if(oldValue > 0){
                         tvCount.setText("Please put the phone in pocket!");
@@ -167,6 +207,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        /*
+          Making the options icon clickable and starting settings activity
+         */
+        switch (item.getItemId()){
+            case R.id.btIconSettings:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     protected void  onStart() {
         super.onStart();
 
@@ -190,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
         if(isWakeLockAcq()){
             wakeLock.release();
         }
+        countdownSound.release();
         alarmSound.release();
         sensorManager.unregisterListener(sensorEventListener);
 
@@ -257,20 +319,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void     enterPwGraceTime(){
-        new CountDownTimer(5000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                Log.d(TAG, "time left to enter pw: "+millisUntilFinished/1000);
-            }
-
-            @Override
-            public void onFinish() {
-                oldVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                audioManager.setStreamVolume
-                        (AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),0);
-                alarmSound.start();
-            }
-        }.start();
+        timeToEnterPw.start();
     }
 
     @Override
