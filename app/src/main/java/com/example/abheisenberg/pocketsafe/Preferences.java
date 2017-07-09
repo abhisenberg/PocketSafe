@@ -20,6 +20,39 @@ public class Preferences {
         return context.getSharedPreferences("Settings", Context.MODE_PRIVATE);
     }
 
+    public static boolean getIfFlashOn(Context context){
+        return getSharedPref(context).getBoolean("flashlight",true);
+    }
+
+    public static void setIfFlashOn(Context context, boolean isSet){
+        SharedPreferences.Editor editor;
+        editor = getSharedPref(context).edit();
+        editor.putBoolean("flashlight",isSet);
+        editor.apply();
+    }
+
+    public static int getGraceTime(Context context){
+        return getSharedPref(context).getInt("grace_countdown_time",5);
+    }
+
+    public static void setGraceTime(Context context, int isSet){
+        SharedPreferences.Editor editor;
+        editor = getSharedPref(context).edit();
+        editor.putInt("grace_countdown_time",isSet);
+        editor.apply();
+    }
+
+    public static int getTimeToShowOnSpinner(Context context){
+        return getSharedPref(context).getInt("to_show_on_spinner",0);
+    }
+
+    public static void setTimeToShowOnSpinner(Context context, int isSet){
+        SharedPreferences.Editor editor;
+        editor = getSharedPref(context).edit();
+        editor.putInt("to_show_on_spinner",isSet);
+        editor.apply();
+    }
+
     public static boolean getCountdownSound(Context context){
         return getSharedPref(context).getBoolean("countdownSound",true);
     }

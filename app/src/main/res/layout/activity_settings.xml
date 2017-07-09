@@ -9,20 +9,66 @@
     tools:context="com.example.abheisenberg.pocketsafe.SettingsActivity">
 
 
+    <TextView
+        android:text="Alert Settings"
+        android:textSize="15sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <Switch
         android:id="@+id/swCountdownSound"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="15sp"
-        android:text="Countdown Timer Sound" />
+        android:text="Countdown timer sound" />
 
     <Switch
-        android:id="@+id/swExtraPw"
+        android:id="@+id/swFlashlight"
         android:layout_marginTop="15dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="15sp"
+        android:text="Use flashlight with alarm" />
+
+    <TextView
+        android:layout_marginTop="35dp"
+        android:text="Security Settings"
+        android:textSize="15sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Switch
+        android:id="@+id/swExtraPw"
+        android:layout_marginTop="3dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
         android:text="Add a separate password to stop alarm" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_marginTop="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Grace time to unlock phone (seconds)"
+            android:textSize="15sp"
+            android:textColor="#111111"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+
+        <Spinner
+            android:id="@+id/spnTimes"
+            android:entries="@array/grace_times"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
+        </Spinner>
+
+    </LinearLayout>
 
 
 </LinearLayout>

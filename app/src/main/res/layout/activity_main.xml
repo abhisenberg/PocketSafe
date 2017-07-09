@@ -6,33 +6,75 @@
     android:layout_height="match_parent"
     tools:context="com.example.abheisenberg.pocketsafe.MainActivity">
 
+    <TextSwitcher
+        android:id="@+id/tsInPocketPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        />
+
     <TextView
-        android:id="@+id/tvCount"
-        android:text="Value"
-        android:gravity="center"
-        android:layout_margin="15dp"
+        android:id="@+id/centerMark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:textSize="35sp"
+        />
+
+    <TextSwitcher
+        android:id="@+id/tsMainText"
+        android:text="@string/intial_text_on_screen"
+        android:gravity="center"
+        android:layout_margin="15dp"
+        android:layout_below="@id/centerMark"
+        android:layout_centerHorizontal="true"
+        android:textSize="15sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <Button
+    <TextView
+        android:id="@+id/tvCountdown"
+        android:gravity="center"
+        android:layout_below="@id/tsMainText"
+        android:layout_centerHorizontal="true"
+        android:textSize="55sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ImageButton
         android:id="@+id/btLock"
-        android:layout_above="@id/tvCount"
+        android:onClick="Lock_onClick"
+        android:layout_above="@id/centerMark"
         android:layout_centerHorizontal="true"
-        android:text="Lock Now"
+        android:src="@drawable/blue_round_button"
+        android:background="@null"
         android:textSize="15sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/btStopSound"
-        android:layout_below="@id/tvCount"
-        android:layout_centerHorizontal="true"
-        android:text="Stop alarm"
-        android:textSize="15sp"
+
+    <TextView
+        android:id="@+id/tvTextOnButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_above="@id/centerMark"
+        android:layout_centerHorizontal="true"
+        android:layout_alignTop="@id/btLock"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:text="START \nSAFE LOCK"
+        android:textColor="#ffffff"
+        />
+
+    <!--<Button-->
+        <!--android:id="@+id/btStopSound"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:text="Stop alarm"-->
+        <!--android:textSize="15sp"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content" />-->
 
 </RelativeLayout>

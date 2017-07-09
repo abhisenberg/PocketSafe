@@ -10,6 +10,11 @@ import android.util.Log;
  */
 
 public class AdminReceiver extends DeviceAdminReceiver {
+
+    /*
+    Receive the admin permission to lock the phone.
+     */
+
     final String TAG = "AdminReceiver";
     @Override
     public void onEnabled(Context context, Intent intent) {

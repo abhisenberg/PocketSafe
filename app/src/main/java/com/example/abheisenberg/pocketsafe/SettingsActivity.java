@@ -7,15 +7,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
 public class SettingsActivity extends AppCompatActivity {
+    /*
+    This activity uses shared preference to store the settings. Defaults have been set already so if the user
+    doesn't change anything default values are returned.
+     */
 
-    Switch swCountdownSound, swExtraPw;
-    SharedPreferences sharedPreferences;
+    Switch swCountdownSound, swExtraPw, swFlashlight;
+    Spinner spnTimes;
 
     public static final String TAG = "SettingsAct";
 
@@ -26,9 +31,13 @@ public class SettingsActivity extends AppCompatActivity {
 
         swCountdownSound = ((Switch)findViewById(R.id.swCountdownSound));
         swExtraPw = ((Switch)findViewById(R.id.swExtraPw));
+        swFlashlight = ((Switch)findViewById(R.id.swFlashlight));
+        spnTimes = ((Spinner)findViewById(R.id.spnTimes));
+        spnTimes.setSelection(Preferences.getTimeToShowOnSpinner(this));
 
         swExtraPw.setChecked(Preferences.getIfExtraPw(this));
         swCountdownSound.setChecked(Preferences.getCountdownSound(this));
+        swFlashlight.setChecked(Preferences.getIfFlashOn(this));
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
@@ -51,19 +60,46 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                         swExtraPw.setChecked(Preferences.getIfExtraPw(SettingsActivity.this));
                         break;
+
+                    case R.id.swFlashlight:
+                        Log.d(TAG, "Flashlight toggled ");
+                        Preferences.setIfFlashOn(SettingsActivity.this, swFlashlight.isChecked());
+                        swFlashlight.setChecked(Preferences.getIfFlashOn(SettingsActivity.this));
+                        break;
                 }
             }
         };
 
+        spnTimes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                int itemSelected = Integer.valueOf(parent.getSelectedItem().toString());
+                Log.d(TAG, "onItemSelected: "+itemSelected);
+                Preferences.setGraceTime(SettingsActivity.this, itemSelected);
+                Preferences.setTimeToShowOnSpinner(SettingsActivity.this, position);
+                Toast.makeText(SettingsActivity.this, "Restart the app if you change the grace time", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         swCountdownSound.setOnClickListener(listener);
         swExtraPw.setOnClickListener(listener);
+        swFlashlight.setOnClickListener(listener);
     }
 
     private void enterExtraPw(){
+        /*
+        Dialog to set the new extra password.
+         */
         Log.d(TAG, "Dialog");
         AlertDialog.Builder alert
                 = new AlertDialog.Builder(this);
         alert.setTitle("Enter New PIN");
+        alert.setMessage("This will be required to stop the alert sound after unlocking the device.");
 
         final EditText input
                 = new EditText((this));
@@ -87,6 +123,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         alert.create();
+        alert.show();
     }
 
 }

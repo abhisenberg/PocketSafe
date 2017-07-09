@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">PocketSafe</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="intial_text_on_screen" >PRESS THE BUTTON ABOVE AND PROTECT YOUR PHONE FROM THEFT</string>
+    <string-array name="grace_times">
+        <item>5</item>
+        <item>4</item>
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+    </string-array>
 </resources>
