@@ -1,11 +1,13 @@
 package com.example.abheisenberg.pocketsafe;
 
+import android.Manifest;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
@@ -16,6 +18,8 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.os.PowerManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void  onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         /*
         For making the splash screen before the main activity shows up.
          */
@@ -195,6 +200,32 @@ public class MainActivity extends AppCompatActivity {
         Enable admin rights as soon as the app starts, to prevent any 'no-admin found' problems.
          */
         enableDeviceAdmin();
+
+        /*
+        Ask for the permission to use camera flashlight. If the user accepts, set the flashlight feature to ON,
+        else set the flashlight feature to OFF
+         */
+
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[] {
+                            Manifest.permission.CAMERA
+                    }, 111);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if(permissions[0].equals(Manifest.permission.CAMERA)){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Preferences.setIfFlashOn(MainActivity.this, true);      //Set the default of flashlight to ON
+            } else {
+                Preferences.setIfFlashOn(MainActivity.this, false);     //Set the default of flashlight to OFF
+            }
+        }
 
     }
 
