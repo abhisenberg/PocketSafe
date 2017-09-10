@@ -353,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, String.valueOf(sensorEvent.values[0]));
                 if(oldValue < 0){
                     oldValue = sensorEvent.values[0];
-                    if(oldValue > 0){
+                    if(oldValue == farValue){
                         //The case where The user did not put the phone in pocket, hence cancel all the operations.
 
                         tsMainText.setText("Please put the phone in pocket!");
