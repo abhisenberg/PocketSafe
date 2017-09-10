@@ -237,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         /*
           Making the options icon clickable and starting settings activity
          */
@@ -348,6 +349,7 @@ public class MainActivity extends AppCompatActivity {
             // onSensorChanged not working properly in some devices.
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
+                float farValue = sensorEvent.sensor.getMaximumRange();
                 Log.d(TAG, String.valueOf(sensorEvent.values[0]));
                 if(oldValue < 0){
                     oldValue = sensorEvent.values[0];
