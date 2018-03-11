@@ -15,4 +15,5 @@ This very simple UI has this trigger button, which-
 
 ### Settings
 ![image](https://user-images.githubusercontent.com/29260302/37256955-29e9434e-2588-11e8-8cbc-65f09a344d11.png)
+
 One can change the preferences according to ease of usage.
