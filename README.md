@@ -1,7 +1,7 @@
 # PocketSafe
 
 Have you or someone you know ever got their phone stolen in a bus or train?
-PocketSafe is a simple solution to this growing probelem, especially in crowded spaces, which collectively costs huge losses to the masses. The app is designed to alert you whenever your phone is taken out of your pocket without your consent.
+PocketSafe is a simple solution to this growing problem, especially in crowded spaces, which collectively costs huge losses to the masses. The app is designed to alert you whenever your phone is taken out of your pocket without your consent.
 
 ### How?
 The trick is to use Proximity sensor of your phone to detect the action of pick-pocketing, and then giving the person a grace time of [5 secs] to enter their password [to prove that they are the owner of this device], if the person who took the phone out is not able to put in the password in the given time frame, the phone will sound an alarm at the highest volume which won't stop until the password is provided. Hence alerting the owner.
